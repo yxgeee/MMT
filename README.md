@@ -13,7 +13,7 @@ The *official* implementation for the [Mutual Mean-Teaching: Pseudo Label Refine
 + We added the **general clustering-based baseline** training for UDA re-ID, i.e. single model training with only hard pseudo labels. 
 + We slightly modified the setting of training iterations `--iters` from  `800` to `400` in the training scripts, achieving similar performance with less time cost.
 + We discovered **a minor hint**, changing the setting of `--dropout` from `0` to `0.5` will achieve supervising improvements in MMT. Intuitively, the dual models are more de-coupled with independent dropout functions.
-+ A reminder here, changing the hyper-parameter '--soft-tri-weight 0.8' to '--soft-tri-weight 1.0' may achieve better performance in some cases. Please refer to ablation study results in Table 2 in our paper.
++ A reminder here, changing the hyper-parameter `--soft-tri-weight 0.8` to `--soft-tri-weight 1.0` may achieve better performance in some cases. Please refer to ablation study results in Table 2 in our paper.
 
 ## Installation
 
