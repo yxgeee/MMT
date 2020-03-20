@@ -76,6 +76,13 @@ We utilized K-Means clustering algorithm in the paper.
 sh scripts/train_mmt_kmeans.sh dukemtmc market1501 resnet50 500
 ```
 
+We supported DBSCAN clustering algorithm currently.
+**Note that** you could add `--rr-gpu` in the training scripts for faster clustering but requiring more GPU memory.
+
+```shell
+sh scripts/train_mmt_dbscan.sh dukemtmc market1501 resnet50
+```
+
 ### Test
 We utilize 1 GTX-1080TI GPU for testing.
 Test the trained model with best performance by
@@ -119,8 +126,8 @@ sh scripts/test.sh msmt17 resnet50 logs/dukemtmcTOmsmt17/resnet50-MMT-1000/model
 sh scripts/test.sh msmt17 resnet50 logs/dukemtmcTOmsmt17/resnet50-MMT-DBSCAN/model_best.pth.tar
 ```
 
-## General clustering-based baseline training
-**Note that** the baseline mentioned in our paper is slightly different from the general clustering-based baseline:
+## General Clustering-based Baseline Training
+**Note that the baseline mentioned in our paper is slightly different from the general clustering-based baseline:**
 + For fair comparison in the ablation study, the baseline in our paper utilized the same dual-model framework as our MMT but using only hard pseudo labels (no soft labels and no mean-teachers), i.e. setting `--soft-ce-weight 0 --soft-tri-weight 0 --alpha 0` in the training scripts.
 + The general clustering-based baseline was illustrated in Figure 2(a) in our paper, which contains only one model. The model is training with a cross-entropy loss and a triplet loss, supervised by hard pseudo labels.
 + Although the baseline in our paper adopted dual models which are *independently* trained with hard losses, but the features extracted for clustering are averaged from dual models. It is **the only difference** from general clustering-based baseline.
