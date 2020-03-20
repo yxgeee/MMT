@@ -127,7 +127,7 @@ sh scripts/test.sh msmt17 resnet50 logs/dukemtmcTOmsmt17/resnet50-MMT-DBSCAN/mod
 ```
 
 ## General Clustering-based Baseline Training
-![framework](figs/baseline.png)
+![baseline](figs/baseline.png)
 
 **Note that the baseline mentioned in our paper is slightly different from the general clustering-based baseline:**
 + For fair comparison in the ablation study, the baseline in our paper utilized the same dual-model framework as our MMT but using only hard pseudo labels (no soft labels and no mean-teachers), i.e. setting `--soft-ce-weight 0 --soft-tri-weight 0 --alpha 0` in the training scripts.
