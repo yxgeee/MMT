@@ -9,7 +9,7 @@ setup(name='MMT',
       url='https://github.com/yxgeee/MMT.git',
       install_requires=[
           'numpy', 'torch==1.1.0', 'torchvision==0.2.2', 
-          'six', 'h5py', 'Pillow==6.1', 'scipy',
+          'six', 'h5py', 'Pillow', 'scipy',
           'scikit-learn', 'metric-learn'],
       packages=find_packages(),
       keywords=[
