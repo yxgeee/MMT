@@ -7,6 +7,13 @@ The *official* implementation for the [Mutual Mean-Teaching: Pseudo Label Refine
 
 ![framework](figs/framework.png)
 
+## What's New
+#### [Mar 20th, 2020]
++ We supported **DBSCAN-based MMT** which could achieve better performance. *Note that* we effectively accelated the Jaccard distance computing process for DBSCAN (around 200s for CPU and 60s for GPU, compared to around 10min in other repos). 
++ We added **general clustering-based baseline** for UDA re-ID, i.e. single model training with only hard pseudo labels. 
++ We slightly modified the setting of training iterations `--iters` from  `800` to `400` in the training scripts, achieving similar performance with less time cost.
++ We discovered **a minor hint**, changing the setting of `--dropout` from `0` to `0.5` will achieve supervising improvements in MMT. Intuitively, the dual models are more de-coupled with independent dropout functions.
+
 ## Installation
 
 ```shell
@@ -51,6 +58,10 @@ Transferring from [DukeMTMC-reID](https://arxiv.org/abs/1609.01775) to [Market-1
 ### Train
 We utilize 4 GTX-1080TI GPUs for training.
 
+**An explanation about the number of GPUs and the size of mini-batches:**
++ We adopted 4 GPUs with a batch size of 64, since we found 16 images out of 4 identities in a mini-batch benefits the learning of BN layers, achieving optimal performance. This setting may affect IBN-ResNet-50 in a larger extent.
++ It is fine to try other hyper-parameters, i.e. GPUs and batch sizes. I recommend to remain a mini-batch of 16 images for the BN layers, e.g. use a batch size of 32 for 2 GPUs training, etc.
+
 #### Stage I: Pre-training on the source domain
 
 ```shell
@@ -58,10 +69,11 @@ sh scripts/pretrain.sh dukemtmc market1501 resnet50 1
 sh scripts/pretrain.sh dukemtmc market1501 resnet50 2
 ```
 
-#### Stage II: End-to-end training with MMT-500
+#### Stage II: End-to-end training with MMT-500 
+We utilized K-Means clustering algorithm in the paper.
 
 ```shell
-sh scripts/train.sh dukemtmc market1501 resnet50 500
+sh scripts/train_mmt_kmeans.sh dukemtmc market1501 resnet50 500
 ```
 
 ### Test
@@ -71,6 +83,8 @@ Test the trained model with best performance by
 sh scripts/test.sh market1501 resnet50 logs/dukemtmcTOmarket1501/resnet50-MMT-500/model_best.pth.tar
 ```
 
+
+
 ## Other Examples:
 **Duke-to-Market (IBN-ResNet-50)**
 ```shell
@@ -78,12 +92,15 @@ sh scripts/test.sh market1501 resnet50 logs/dukemtmcTOmarket1501/resnet50-MMT-50
 sh scripts/pretrain.sh dukemtmc market1501 resnet_ibn50a 1
 sh scripts/pretrain.sh dukemtmc market1501 resnet_ibn50a 2
 # end-to-end training with MMT-500
-sh scripts/train.sh dukemtmc market1501 resnet_ibn50a 500
+sh scripts/train_mmt_kmeans.sh dukemtmc market1501 resnet_ibn50a 500
 # or MMT-700
-sh scripts/train.sh dukemtmc market1501 resnet_ibn50a 700
+sh scripts/train_mmt_kmeans.sh dukemtmc market1501 resnet_ibn50a 700
+# or MMT-DBSCAN
+sh scripts/train_mmt_dbscan.sh dukemtmc market1501 resnet_ibn50a 
 # testing the best model
 sh scripts/test.sh market1501 resnet_ibn50a logs/dukemtmcTOmarket1501/resnet_ibn50a-MMT-500/model_best.pth.tar
 sh scripts/test.sh market1501 resnet_ibn50a logs/dukemtmcTOmarket1501/resnet_ibn50a-MMT-700/model_best.pth.tar
+sh scripts/test.sh market1501 resnet_ibn50a logs/dukemtmcTOmarket1501/resnet_ibn50a-MMT-DBSCAN/model_best.pth.tar
 ```
 **Duke-to-MSMT (ResNet-50)**
 ```shell
@@ -91,17 +108,35 @@ sh scripts/test.sh market1501 resnet_ibn50a logs/dukemtmcTOmarket1501/resnet_ibn
 sh scripts/pretrain.sh dukemtmc msmt17 resnet50 1
 sh scripts/pretrain.sh dukemtmc msmt17 resnet50 2
 # end-to-end training with MMT-500
-sh scripts/train.sh dukemtmc msmt17 resnet50 500
+sh scripts/train_mmt_kmeans.sh dukemtmc msmt17 resnet50 500
 # or MMT-1000
-sh scripts/train.sh dukemtmc msmt17 resnet50 1000
+sh scripts/train_mmt_kmeans.sh dukemtmc msmt17 resnet50 1000
+# or MMT-DBSCAN
+sh scripts/train_mmt_dbscan.sh dukemtmc market1501 resnet50 
 # testing the best model
 sh scripts/test.sh msmt17 resnet50 logs/dukemtmcTOmsmt17/resnet50-MMT-500/model_best.pth.tar
 sh scripts/test.sh msmt17 resnet50 logs/dukemtmcTOmsmt17/resnet50-MMT-1000/model_best.pth.tar
+sh scripts/test.sh msmt17 resnet50 logs/dukemtmcTOmsmt17/resnet50-MMT-DBSCAN/model_best.pth.tar
+```
+
+## General clustering-based baseline training
+**Note that** the baseline mentioned in our paper is slightly different from the general clustering-based baseline:
++ For fair comparison in the ablation study, the baseline in our paper utilized the same dual-model framework as our MMT but using only hard pseudo labels (no soft labels and no mean-teachers), i.e. setting `--soft-ce-weight 0 --soft-tri-weight 0 --alpha 0` in the training scripts.
++ The general clustering-based baseline was illustrated in Figure 2(a) in our paper, which contains only one model. The model is training with a cross-entropy loss and a triplet loss, supervised by hard pseudo labels.
++ Although the baseline in our paper adopted dual models which are *independently* trained with hard losses, but the features extracted for clustering are averaged from dual models. It is **the only difference** from general clustering-based baseline.
+
+Here, we supported training with general clustering-based baseline for further academic usage.
+For example, Duke-to-Market with ResNet-50
+```shell
+# for K-Means
+sh scripts/train_baseline_kmeans.sh dukemtmc market1501 resnet50 500
+# for DBSCAN
+sh scripts/train_baseline_dbscan.sh dukemtmc market1501 resnet50 
 ```
 
 
 ## Download Trained Models
-*Source-domain pre-trained models and our MMT models can be downloaded from the [link](https://drive.google.com/open?id=1WC4JgbkaAr40uEew_JEqjUxgKIiIQx-W).*
+*Source-domain pre-trained models and all our MMT models in the paper can be downloaded from the [link](https://drive.google.com/open?id=1WC4JgbkaAr40uEew_JEqjUxgKIiIQx-W).*
 ![results](figs/results.png)
 
 

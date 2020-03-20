@@ -25,7 +25,7 @@ from mmt.utils.logging import Logger
 from mmt.utils.serialization import load_checkpoint, save_checkpoint, copy_state_dict
 
 
-start_epoch = best_mAP = 0
+best_mAP = 0
 
 def get_data(name, data_dir):
     root = osp.join(data_dir, name)
@@ -128,7 +128,7 @@ def main():
 
 
 def main_worker(args):
-    global start_epoch, best_mAP
+    global best_mAP
 
     cudnn.benchmark = True
 
@@ -139,7 +139,8 @@ def main_worker(args):
     iters = args.iters if (args.iters>0) else None
     dataset_target = get_data(args.dataset_target, args.data_dir)
     test_loader_target = get_test_loader(dataset_target, args.height, args.width, args.batch_size, args.workers)
-
+    cluster_loader = get_test_loader(dataset_target, args.height, args.width, args.batch_size, args.workers, testset=dataset_target.train)
+    
     # Create model
     model_1, model_2, model_1_ema, model_2_ema = create_model(args)
 
@@ -147,24 +148,15 @@ def main_worker(args):
     evaluator_1_ema = Evaluator(model_1_ema)
     evaluator_2_ema = Evaluator(model_2_ema)
 
-    clusters = [args.num_clusters]*args.epochs
-    feature_length = args.features if args.features>0 else 2048
-    moving_avg_features = np.zeros((len(dataset_target.train), feature_length))
-
-    for nc in range(len(clusters)):
-        cluster_loader = get_test_loader(dataset_target, args.height, args.width, args.batch_size, args.workers, testset=dataset_target.train)
-
+    for epoch in range(args.epochs):
         dict_f, _ = extract_features(model_1_ema, cluster_loader, print_freq=50)
         cf_1 = torch.stack(list(dict_f.values())).numpy()
         dict_f, _ = extract_features(model_2_ema, cluster_loader, print_freq=50)
         cf_2 = torch.stack(list(dict_f.values())).numpy()
         cf = (cf_1+cf_2)/2
 
-        moving_avg_features = moving_avg_features*args.moving_avg_momentum+cf*(1-args.moving_avg_momentum)
-        moving_avg_features = moving_avg_features / (1-args.moving_avg_momentum**(nc+1))
-
-        print('\n Clustering into {} classes \n'.format(clusters[nc]))
-        km = KMeans(n_clusters=clusters[nc], random_state=args.seed, n_jobs=2).fit(moving_avg_features)
+        print('\n Clustering into {} classes \n'.format(args.num_clusters))
+        km = KMeans(n_clusters=args.num_clusters, random_state=args.seed, n_jobs=2).fit(cf)
 
         model_1.module.classifier.weight.data.copy_(torch.from_numpy(normalize(km.cluster_centers_, axis=1)).float().cuda())
         model_2.module.classifier.weight.data.copy_(torch.from_numpy(normalize(km.cluster_centers_, axis=1)).float().cuda())
@@ -196,10 +188,9 @@ def main_worker(args):
 
         # Trainer
         trainer = MMTTrainer(model_1, model_2, model_1_ema, model_2_ema,
-                                num_cluster=clusters[nc], alpha=args.alpha)
+                                num_cluster=args.num_clusters, alpha=args.alpha)
 
         train_loader_target.new_epoch()
-        epoch = nc
 
         trainer.train(epoch, train_loader_target, optimizer,
                     ce_soft_weight=args.soft_ce_weight, tri_soft_weight=args.soft_tri_weight,

@@ -5,7 +5,7 @@ MODEL=$3
 
 if [ $# -ne 3 ]
   then
-    echo "Arguments error: <TARGET> <ARCH> <MODEL>"
+    echo "Arguments error: <TARGET> <ARCH> <MODEL PATH>"
     exit 1
 fi
 
