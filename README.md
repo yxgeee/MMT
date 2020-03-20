@@ -9,8 +9,8 @@ The *official* implementation for the [Mutual Mean-Teaching: Pseudo Label Refine
 
 ## What's New
 #### [Mar 20th, 2020]
-+ We supported **DBSCAN-based MMT** which could achieve better performance. *Note that* we effectively accelated the Jaccard distance computing process for DBSCAN (around 200s for CPU and 60s for GPU, compared to around 10min in other repos). 
-+ We added **general clustering-based baseline** for UDA re-ID, i.e. single model training with only hard pseudo labels. 
++ We supported **DBSCAN-based MMT** which could achieve better performance. *Note that* we effectively accelerated the Jaccard distance computing process for DBSCAN (around 200s for CPU and 60s for GPU, compared to around 10min in other repos). 
++ We added the **general clustering-based baseline** training for UDA re-ID, i.e. single model training with only hard pseudo labels. 
 + We slightly modified the setting of training iterations `--iters` from  `800` to `400` in the training scripts, achieving similar performance with less time cost.
 + We discovered **a minor hint**, changing the setting of `--dropout` from `0` to `0.5` will achieve supervising improvements in MMT. Intuitively, the dual models are more de-coupled with independent dropout functions.
 
@@ -132,9 +132,9 @@ sh scripts/test.sh msmt17 resnet50 logs/dukemtmcTOmsmt17/resnet50-MMT-DBSCAN/mod
 **Note that the baseline mentioned in our paper is slightly different from the general clustering-based baseline:**
 + For fair comparison in the ablation study, the baseline in our paper utilized the same dual-model framework as our MMT but using only hard pseudo labels (no soft labels and no mean-teachers), i.e. setting `--soft-ce-weight 0 --soft-tri-weight 0 --alpha 0` in the training scripts.
 + The general clustering-based baseline is illustrated as above, which contains only one model. The model is training with a cross-entropy loss and a triplet loss, supervised by hard pseudo labels.
-+ Although the baseline in our paper adopted dual models which are *independently* trained with hard losses, but the features extracted for clustering are averaged from dual models. It is **the only difference** from general clustering-based baseline.
++ Although the baseline in our paper adopted dual models that are *independently* trained with hard losses, the features extracted for clustering are averaged from dual models. It is **the only difference** from the general clustering-based baseline.
 
-Here, we supported training with general clustering-based baseline for further academic usage.
+Here, we supported training with the general clustering-based baseline for further academic usage.
 For example, Duke-to-Market with ResNet-50
 ```shell
 # for K-Means
