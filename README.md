@@ -8,6 +8,9 @@ The *official* implementation for the [Mutual Mean-Teaching: Pseudo Label Refine
 ![framework](figs/framework.png)
 
 ## What's New
+#### [Mar 27th, 2020]
++ We wrote a Chinese blog about this paper at [[Zhihu]](https://zhuanlan.zhihu.com/p/116074945).
+
 #### [Mar 20th, 2020]
 + We supported **DBSCAN-based MMT** which could achieve better performance. *Note that* we effectively accelerated the Jaccard distance computing process for DBSCAN (around 200s for CPU and 60s for GPU, compared to around 10min in other repos). 
 + We added the **general clustering-based baseline** training for UDA re-ID, i.e. single model training with only hard pseudo labels. 
