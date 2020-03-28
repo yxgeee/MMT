@@ -50,7 +50,7 @@ def get_train_loader(dataset, height, width, batch_size, workers,
 	         T.RandomErasing(probability=0.5, mean=[0.485, 0.456, 0.406])
          ])
 
-    train_set = dataset.train if trainset is None else trainset
+    train_set = sorted(dataset.train) if trainset is None else trainset
     rmgs_flag = num_instances > 0
     if rmgs_flag:
         sampler = RandomMultipleGallerySampler(train_set, num_instances)

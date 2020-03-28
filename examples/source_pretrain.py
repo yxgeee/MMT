@@ -33,7 +33,7 @@ def get_data(name, data_dir, height, width, batch_size, workers, num_instances, 
     normalizer = T.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
 
-    train_set = dataset.train
+    train_set = sorted(dataset.train)
     num_classes = dataset.num_train_pids
 
     train_transformer = T.Compose([
