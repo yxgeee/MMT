@@ -154,6 +154,12 @@ sh scripts/train_baseline_dbscan.sh dukemtmc market1501 resnet50
 *Source-domain pre-trained models and all our MMT models in the paper can be downloaded from the [link](https://drive.google.com/open?id=1WC4JgbkaAr40uEew_JEqjUxgKIiIQx-W).*
 ![results](figs/results.png)
 
+## TODO
+- [x] Support DBSCAN-based training
+- [ ] Further accelerate the clustering process
+- [ ] Support training with more datasets
+- [ ] Support pure unsupervised training 
+
 
 ## Citation
 If you find this code useful for your research, please cite our paper
