@@ -8,6 +8,9 @@ The *official* implementation for the [Mutual Mean-Teaching: Pseudo Label Refine
 ![framework](figs/framework.png)
 
 ## What's New
+#### [Jul 1st, 2020]
++ We did the code refactoring to support distributed training and more features. Please see [OpenUnReID](https://github.com/open-mmlab/OpenUnReID).
+
 #### [Mar 27th, 2020]
 + We wrote a Chinese blog about this paper at [[Zhihu]](https://zhuanlan.zhihu.com/p/116074945).
 
@@ -17,6 +20,7 @@ The *official* implementation for the [Mutual Mean-Teaching: Pseudo Label Refine
 + We slightly modified the setting of training iterations `--iters` from  `800` to `400` in the training scripts, achieving similar performance with less time cost.
 + We discovered **a minor hint**, changing the setting of `--dropout` from `0` to `0.5` will achieve supervising improvements in MMT. Intuitively, the dual models are more de-coupled with independent dropout functions.
 + A reminder here, changing the hyper-parameter `--soft-tri-weight 0.8` to `--soft-tri-weight 1.0` may achieve better performance in some cases. Please refer to ablation study results in Table 2 in our paper.
+
 
 ## Installation
 
@@ -154,11 +158,6 @@ sh scripts/train_baseline_dbscan.sh dukemtmc market1501 resnet50
 *Source-domain pre-trained models and all our MMT models in the paper can be downloaded from the [link](https://drive.google.com/open?id=1WC4JgbkaAr40uEew_JEqjUxgKIiIQx-W).*
 ![results](figs/results.png)
 
-## TODO
-- [x] Support DBSCAN-based training
-- [ ] Further accelerate the clustering process
-- [ ] Support training with more datasets
-- [ ] Support pure unsupervised training 
 
 
 ## Citation
